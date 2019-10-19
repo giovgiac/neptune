@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import print_function
 
 from layers.dilated_convolution import DilatedConv2D
+from layers.normalization import InstanceNormalization
 from typing import Tuple, Union
 
 import tensorflow as tf
@@ -24,6 +25,7 @@ class Encode(tf.keras.layers.Layer):
 
         # Create encode sublayers.
         self.conv_1 = DilatedConv2D(filters=filters, kernel_size=kernel_size, padding='same')
+        self.norm_1 = InstanceNormalization(axis=-1)
         self.actv_1 = activation_fn()
 
         if self.with_pool:
@@ -31,11 +33,13 @@ class Encode(tf.keras.layers.Layer):
 
         if self.with_reduction:
             self.conv_2 = tf.keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=2, padding='same')
+            self.norm_2 = InstanceNormalization(axis=-1)
             self.actv_2 = activation_fn()
 
     @tf.function
     def call(self, inputs, training=False) -> tf.Tensor:
         x = self.conv_1(inputs)
+        x = self.norm_1(x)
         x = self.actv_1(x)
 
         if self.with_pool:
@@ -43,6 +47,7 @@ class Encode(tf.keras.layers.Layer):
 
         if self.with_reduction:
             x = self.conv_2(x)
+            x = self.norm_2(x)
             x = self.actv_2(x)
 
         return x

@@ -21,7 +21,7 @@ flags.DEFINE_string("name", "auto", "Name of the folder to store the files of th
 flags.DEFINE_float("learning_rate", 2e-4, "Initial learning rate for the chosen optimizer")
 flags.DEFINE_integer("batch_size", 8, "The size of the batch to use while training the network.", lower_bound=1)
 flags.DEFINE_integer("filters", 8, "A parameter that scales the depth of the neural network.", lower_bound=1)
-flags.DEFINE_integer("num_epochs", 64, "Number of epochs to train the network for.", lower_bound=1)
+flags.DEFINE_integer("num_epochs", 100, "Number of epochs to train the network for.", lower_bound=1)
 
 # Data entries
 flags.DEFINE_list("input_shape", [256, 128, 3], "The shape of the data to input in the neural network.")
@@ -72,5 +72,5 @@ def process_config() -> flags.FlagValues:
                                             config.presentation_dir, config.summary_dir))
 
     # Log out the command for using TensorBoard.
-    logging.info('tensorboard --logdir="{}" --port 6006'.format(os.path.abspath(config.summary_dir)))
+    logging.info('tensorboard --logdir="{}" --bind_all --port 6006'.format(os.path.abspath(config.summary_dir)))
     return config

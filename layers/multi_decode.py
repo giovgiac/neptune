@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import print_function
 
 from layers.dilated_convolution import DilatedConv2D
+from layers.normalization import InstanceNormalization
 from typing import Tuple, Union
 
 import tensorflow as tf
@@ -24,11 +25,14 @@ class MultiDecode(tf.keras.layers.Layer):
 
         # Create decode sublayers.
         if self.with_zoom:
-            self.upsample = tf.keras.layers.UpSampling2D(size=2, interpolation='bilinear')
+            self.upsamp = tf.keras.layers.UpSampling2D(size=2, interpolation='bilinear')
             self.upconv = tf.keras.layers.Conv2D(filters=filters, kernel_size=4, padding='same')
+            self.upnorm = InstanceNormalization(axis=-1)
+            self.upactv = activation_fn()
 
         self.concatenate = tf.keras.layers.Concatenate()
         self.conv = DilatedConv2D(filters=filters, kernel_size=kernel_size, padding='same')
+        self.norm = InstanceNormalization(axis=-1)
         self.actv = activation_fn()
 
         if with_dropout:
@@ -39,11 +43,14 @@ class MultiDecode(tf.keras.layers.Layer):
         [x, y, z] = inputs
 
         if self.with_zoom:
-            x = self.upsample(x)
+            x = self.upsamp(x)
             x = self.upconv(x)
+            x = self.upnorm(x)
+            x = self.upactv(x)
 
         x = self.concatenate([x, y, z])
         x = self.conv(x)
+        x = self.norm(x)
         x = self.actv(x)
 
         if self.with_dropout:

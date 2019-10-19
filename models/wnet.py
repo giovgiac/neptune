@@ -22,8 +22,10 @@ class WNet(BaseModel):
 
         # Define sublayers of the W-Net.
         self.son_encode_1 = Encode(filters=filters, kernel_size=3, activation_fn=tf.keras.layers.ELU,
-                                   with_pool=False, with_reduction=True, name='sonar_encode')
+                                   with_pool=False, with_reduction=False, name='sonar_encode')
         self.son_encode_2 = Encode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                                   with_pool=False, with_reduction=True, name='sonar_encode')
+        self.son_encode_3 = Encode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ELU,
                                    with_pool=False, with_reduction=True, name='sonar_encode')
 
         self.sat_encode_1 = Encode(filters=filters, kernel_size=3, activation_fn=tf.keras.layers.ELU,
@@ -50,6 +52,7 @@ class WNet(BaseModel):
         # Sonar
         son_e1 = self.son_encode_1(x, training=training)
         son_e2 = self.son_encode_2(son_e1, training=training)
+        son_e3 = self.son_encode_3(son_e2, training=training)
 
         # Satellite
         sat_e1 = self.sat_encode_1(y, training=training)
@@ -57,10 +60,10 @@ class WNet(BaseModel):
         sat_e3 = self.sat_encode_3(sat_e2, training=training)
 
         # Concatenate
-        z = self.son_sat_cat([son_e2, sat_e3])
+        z = self.son_sat_cat([son_e3, sat_e3])
 
         # Decode
-        z = self.decode_1([z, son_e1, sat_e2], training=training)
-        z = self.decode_2([z, x, sat_e1], training=training)
+        z = self.decode_1([z, son_e2, sat_e2], training=training)
+        z = self.decode_2([z, son_e1, sat_e1], training=training)
 
         return self.final(z)
