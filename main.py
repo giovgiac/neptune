@@ -11,6 +11,7 @@ from datasets.general_dataset import GeneralDataset
 from evaluators.general_evaluator import GeneralEvaluator
 from loggers.logger import Logger
 from models.wnet import WNet
+from optimizers.radam import RAdam
 from trainers.general_trainer import GeneralTrainer
 from utils.config import process_config
 
@@ -39,7 +40,7 @@ def main(argv) -> None:
 
         # Define the model.
         loss = tf.keras.losses.MeanAbsoluteError()
-        optimizer = tf.keras.optimizers.Adam(learning_rate=config.learning_rate)
+        optimizer = RAdam(learning_rate=config.learning_rate)
         model = WNet(filters=config.filters, loss=loss, optimizer=optimizer)
         if config.mode == "restore":
             model.load_checkpoint()
