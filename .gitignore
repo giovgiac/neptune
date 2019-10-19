@@ -1,0 +1,14 @@
+# .gitignore
+
+# Cache
+*.pyc
+
+# Datasets
+datasets/general_aracati
+datasets/matching_aracati
+
+# Executions
+executions/
+
+# Preferences
+.idea/
