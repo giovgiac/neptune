@@ -26,9 +26,8 @@ class BaseDataset(abc.ABC):
         self.data = self.data.batch(batch_size=batch_size, drop_remainder=True)
         self.data = self.data.prefetch(buffer_size=multiprocessing.cpu_count())
 
-    @abc.abstractmethod
     def __len__(self) -> int:
-        raise NotImplementedError
+        return self.length // self.batch_size
 
     @abc.abstractmethod
     @tf.function

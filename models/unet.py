@@ -21,25 +21,25 @@ class UNet(BaseModel):
         self.filters = filters
 
         # Define sublayers of the U-Net.
-        self.encode_1 = Encode(filters=filters, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                               with_reduction=False)
-        self.encode_2 = Encode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                               with_reduction=True)
-        self.encode_3 = Encode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                               with_reduction=True)
-        self.encode_4 = Encode(filters=filters * 8, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                               with_reduction=True)
-        self.encode_5 = Encode(filters=filters * 16, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                               with_reduction=True)
+        self.encode_1 = Encode(filters=filters, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                               with_pool=False, with_reduction=False, name='encode')
+        self.encode_2 = Encode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                               with_pool=True, with_reduction=False, name='encode')
+        self.encode_3 = Encode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                               with_pool=True, with_reduction=False, name='encode')
+        self.encode_4 = Encode(filters=filters * 8, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                               with_pool=True, with_reduction=False, name='encode')
+        self.encode_5 = Encode(filters=filters * 16, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                               with_pool=True, with_reduction=False, name='encode')
 
-        self.decode_1 = Decode(filters=filters * 8, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                               with_dropout=True)
-        self.decode_2 = Decode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                               with_dropout=True)
-        self.decode_3 = Decode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                               with_dropout=False)
-        self.decode_4 = Decode(filters=filters, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                               with_dropout=False)
+        self.decode_1 = Decode(filters=filters * 8, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                               with_dropout=True, with_zoom=True, name='decode')
+        self.decode_2 = Decode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                               with_dropout=True, with_zoom=True, name='decode')
+        self.decode_3 = Decode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                               with_dropout=False, with_zoom=True, name='decode')
+        self.decode_4 = Decode(filters=filters, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                               with_dropout=False, with_zoom=True, name='decode')
 
         self.final = tf.keras.layers.Conv2D(filters=self.config.output_shape[2], kernel_size=1,
                                             padding='same', activation='softmax')

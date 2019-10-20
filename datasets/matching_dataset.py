@@ -8,7 +8,6 @@ from base.base_dataset import BaseDataset
 from typing import Tuple
 
 import glob
-import numpy as np
 import os
 import pandas as pd
 import tensorflow as tf

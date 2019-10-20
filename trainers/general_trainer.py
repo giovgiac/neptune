@@ -61,19 +61,29 @@ class GeneralTrainer(BaseTrainer):
         errs = []
         predictions = []
         targets = []
+        metrics = {"psnr": [], "ssim": []}
         for data, _ in zip(self.valid_dataset.data, loop):
-            err, prediction, target = self.validate_step(data)
+            err, prediction, target, psnr, ssim = self.validate_step(data)
 
             # Append step data to epoch data list.
             errs.append(err)
             predictions.append(prediction)
             targets.append(target)
+            metrics["psnr"].append(psnr)
+            metrics["ssim"].append(ssim)
 
+        # Output validation loss and images to TensorBoard.
         batch = rand.choice(range(len(predictions)))
         self.logger.summarize(self.model.global_step, summarizer="validation", summaries_dict={
             "prediction": predictions[batch],
             "target": targets[batch],
             "total_loss": np.mean(errs)
+        })
+
+        # Categorize validation metrics under TensorBoard.
+        self.logger.summarize(self.model.global_step, summarizer="validation", scope="metrics", summaries_dict={
+            "psnr": np.mean(metrics["psnr"]),
+            "ssim": np.mean(metrics["ssim"])
         })
 
     @tf.function
@@ -84,4 +94,8 @@ class GeneralTrainer(BaseTrainer):
         prediction = self.model([x, y], training=False)
         loss = self.model.loss(z, prediction)
 
-        return loss, prediction, z
+        # Calculate metrics on validation data.
+        psnr = tf.image.psnr(z, prediction, max_val=1.0)
+        ssim = tf.image.ssim(z, prediction, max_val=1.0)
+
+        return loss, prediction, z, psnr, ssim

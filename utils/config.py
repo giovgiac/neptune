@@ -24,9 +24,9 @@ flags.DEFINE_integer("filters", 8, "A parameter that scales the depth of the neu
 flags.DEFINE_integer("num_epochs", 100, "Number of epochs to train the network for.", lower_bound=1)
 
 # Data entries
-flags.DEFINE_list("input_shape", [256, 128, 3], "The shape of the data to input in the neural network.")
-flags.DEFINE_list("satellite_shape", [512, 256, 3], "The shape of the satellite image to input in the network.")
-flags.DEFINE_list("output_shape", [256, 128, 3], "The shape of the data that will be output from the neural network.")
+flags.DEFINE_list("input_shape", [256, 128, 1], "The shape of the data to input in the neural network.")
+flags.DEFINE_list("satellite_shape", [256, 128, 1], "The shape of the satellite image to input in the network.")
+flags.DEFINE_list("output_shape", [256, 128, 1], "The shape of the data that will be output from the neural network.")
 
 # Non-configurable entries
 flags.DEFINE_string("checkpoint_dir", "", "Location to save the training checkpoints. (Do not edit).")

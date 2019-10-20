@@ -25,9 +25,6 @@ class ImageDataset(BaseDataset):
         super(ImageDataset, self).__init__(batch_size=batch_size, length=len(self._x_filenames),
                                            types=(tf.string, tf.string))
 
-    def __len__(self) -> int:
-        return self.length // self.batch_size
-
     @tf.function
     def _load_x(self, filename: str) -> tf.Tensor:
         raw = tf.io.read_file(filename)

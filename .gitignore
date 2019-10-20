@@ -6,6 +6,7 @@
 # Datasets
 datasets/general_aracati
 datasets/matching_aracati
+datasets/segmentation_aracati
 
 # Executions
 executions/

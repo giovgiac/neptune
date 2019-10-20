@@ -28,9 +28,6 @@ class GeneralDataset(BaseDataset):
         super(GeneralDataset, self).__init__(batch_size=batch_size, length=len(self._x_filenames),
                                              types=(tf.string, tf.string, tf.string))
 
-    def __len__(self) -> int:
-        return self.length // self.batch_size
-
     @staticmethod
     def _extract_satellites(folder: str, filenames: List[str]):
         satellites = []

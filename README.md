@@ -16,11 +16,12 @@ satellite image (W-Net).
 ## Dependencies
 
 Currently, our codebase depends on the following packages:
-* Abseil >= 0.7.1
-* Namegenerator >= 1.0.6
-* Pandas >= 0.24.2
-* TensorFlow >= 2.0.0
-* TQDM >= 4.36.1
+* abseil >= 0.7.1
+* namegenerator >= 1.0.6
+* pandas >= 0.24.2
+* scikit-learn >= 0.21.3
+* tensorflow >= 2.0.0
+* tqdm >= 4.36.1
 
 ## Execution
 
