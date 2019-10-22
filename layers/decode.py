@@ -28,12 +28,15 @@ class Decode(tf.keras.layers.Layer):
             self.upsamp = tf.keras.layers.UpSampling2D(size=2, interpolation='bilinear')
             self.upconv = tf.keras.layers.Conv2D(filters=filters, kernel_size=4, padding='same')
             self.upnorm = InstanceNormalization(axis=-1)
-            self.upactv = activation_fn()
+            if self.activation_fn:
+                self.upactv = activation_fn()
 
         self.concatenate = tf.keras.layers.Concatenate()
-        self.conv = DilatedConv2D(filters=filters, kernel_size=kernel_size, padding='same')
+        self.conv = DilatedConv2D(filters=filters, kernel_size=kernel_size, padding='same',
+                                  activation_fn=activation_fn)
         self.norm = InstanceNormalization(axis=-1)
-        self.actv = activation_fn()
+        if self.activation_fn:
+            self.actv = activation_fn()
         # self.conv_1 = tf.keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, padding='same')
         # self.actv_1 = activation_fn()
         # self.conv_2 = tf.keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, padding='same')
@@ -50,12 +53,14 @@ class Decode(tf.keras.layers.Layer):
             x = self.upsamp(x)
             x = self.upconv(x)
             x = self.upnorm(x)
-            x = self.upactv(x)
+            if self.activation_fn:
+                x = self.upactv(x)
 
         x = self.concatenate([x, s])
         x = self.conv(x)
         x = self.norm(x)
-        x = self.actv(x)
+        if self.activation_fn:
+            x = self.actv(x)
         # x = self.conv_1(x)
         # x = self.actv_1(x)
         # x = self.conv_2(x)

@@ -17,17 +17,6 @@ import time
 flags.DEFINE_enum("mode", "train", ["evaluate", "restore", "train"], "The modes that are available.")
 flags.DEFINE_string("name", "auto", "Name of the folder to store the files of the running experiment.")
 
-# Network entries
-flags.DEFINE_float("learning_rate", 2e-4, "Initial learning rate for the chosen optimizer")
-flags.DEFINE_integer("batch_size", 8, "The size of the batch to use while training the network.", lower_bound=1)
-flags.DEFINE_integer("filters", 8, "A parameter that scales the depth of the neural network.", lower_bound=1)
-flags.DEFINE_integer("num_epochs", 100, "Number of epochs to train the network for.", lower_bound=1)
-
-# Data entries
-flags.DEFINE_list("input_shape", [256, 128, 1], "The shape of the data to input in the neural network.")
-flags.DEFINE_list("satellite_shape", [256, 128, 1], "The shape of the satellite image to input in the network.")
-flags.DEFINE_list("output_shape", [256, 128, 1], "The shape of the data that will be output from the neural network.")
-
 # Non-configurable entries
 flags.DEFINE_string("checkpoint_dir", "", "Location to save the training checkpoints. (Do not edit).")
 flags.DEFINE_string("evaluate_dir", "", "Location to save the evaluation results. (Do not edit).")

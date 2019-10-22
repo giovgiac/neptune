@@ -30,7 +30,7 @@ change default configuration, such as shape or batch size, then you will also wa
 
 After setting up the appropriate networks, datasets and configurations, execution is as simple as:
 ```shell script
-$ python main.py
+$ python general.py
 ```
 
 The command for tensorboard will be automatically generated and printed by the program in the terminal.
@@ -38,7 +38,7 @@ The command for tensorboard will be automatically generated and printed by the p
 Configuration can also be specified via command-line arguments. For a list of all possibilities take a look at
 'config.py', an example is provided below:
 ```shell script
-$ python main.py --batch_size=16 --learning_rate=1e-4
+$ python general.py --batch_size=16 --learning_rate=1e-4
 ```
 
 ## Publications

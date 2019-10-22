@@ -24,7 +24,8 @@ class BaseTrainer(abc.ABC):
         self.valid_dataset = valid_dataset
 
         # Build model and print summary.
-        self.model.build(input_shape=[(None,) + self.config.input_shape, (None,) + self.config.satellite_shape])
+        #self.model.build(input_shape=[(None,) + self.config.input_shape, (None,) + self.config.satellite_shape])
+        self.model.build(input_shape=(None,) + self.config.input_shape)
         self.model.summary(print_fn=logging.info)
 
     def train(self) -> None:

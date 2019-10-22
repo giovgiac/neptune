@@ -38,7 +38,7 @@ class GeneralTrainer(BaseTrainer):
             # Increment global step counter.
             self.model.global_step.assign_add(delta=1)
 
-        self.logger.summarize(self.model.global_step, summarizer="train", summaries_dict={
+        self.logger.summarize(self.model.global_step, summarizer="train", scope="model", summaries_dict={
             "total_loss": np.mean(errs)
         })
 
@@ -74,7 +74,7 @@ class GeneralTrainer(BaseTrainer):
 
         # Output validation loss and images to TensorBoard.
         batch = rand.choice(range(len(predictions)))
-        self.logger.summarize(self.model.global_step, summarizer="validation", summaries_dict={
+        self.logger.summarize(self.model.global_step, summarizer="validation", scope="model", summaries_dict={
             "prediction": predictions[batch],
             "target": targets[batch],
             "total_loss": np.mean(errs)

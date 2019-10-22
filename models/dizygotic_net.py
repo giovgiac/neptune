@@ -6,7 +6,7 @@ from __future__ import print_function
 
 from base.base_model import BaseModel
 from layers.encode import Encode
-from typing import Optional
+from typing import Optional, Tuple
 
 import tensorflow as tf
 
@@ -23,48 +23,62 @@ class DizygoticNet(BaseModel):
         # Define sublayers of the Dizygotic Network.
 
         # Sonar encoding layers.
-        self.son_e1 = Encode(filters=filters, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+        self.son_e1 = Encode(filters=filters * 1, kernel_size=3, activation_fn=tf.keras.layers.ELU,
                              with_pool=True, with_reduction=False, name='sonar_encode')
         self.son_e2 = Encode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ELU,
                              with_pool=True, with_reduction=False, name='sonar_encode')
-        self.son_e3 = Encode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+        self.son_e3 = Encode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                             with_pool=True, with_reduction=False, name='sonar_encode')
+        self.son_e4 = Encode(filters=filters * 4, kernel_size=3, activation_fn=None,
                              with_pool=True, with_reduction=False, name='sonar_encode')
         self.son_f = tf.keras.layers.Flatten()
+        self.son_l = tf.keras.layers.Lambda(lambda x: tf.math.l2_normalize(x, axis=1))
 
         # Satellite encoding layers.
-        self.sat_e1 = Encode(filters=filters, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+        self.sat_e1 = Encode(filters=filters * 1, kernel_size=3, activation_fn=tf.keras.layers.ELU,
                              with_pool=True, with_reduction=False, name='satellite_encode')
         self.sat_e2 = Encode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ELU,
                              with_pool=True, with_reduction=False, name='satellite_encode')
-        self.sat_e3 = Encode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+        self.sat_e3 = Encode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ELU,
+                             with_pool=True, with_reduction=False, name='satellite_encode')
+        self.sat_e4 = Encode(filters=filters * 4, kernel_size=3, activation_fn=None,
                              with_pool=True, with_reduction=False, name='satellite_encode')
         self.sat_f = tf.keras.layers.Flatten()
+        self.sat_l = tf.keras.layers.Lambda(lambda x: tf.math.l2_normalize(x, axis=1))
 
-        self.son_sat_cat = tf.keras.layers.Concatenate()
+        #self.son_sat_cat = tf.keras.layers.Concatenate()
+        self.son_sat_sub = tf.keras.layers.Subtract()
 
         # Multilayer perceptron to match encodings.
-        self.dense_1 = tf.keras.layers.Dense(units=64, activation='elu')
-        self.dense_2 = tf.keras.layers.Dense(units=1, activation='sigmoid')
+        #self.dense_1 = tf.keras.layers.Dense(units=64, activation='elu')
+        #self.dense_2 = tf.keras.layers.Dense(units=1, activation='sigmoid')
 
     @tf.function
-    def call(self, inputs, training=None, mask=None) -> tf.Tensor:
+    def call(self, inputs, training=None, mask=None) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
         [x, y] = inputs
 
         # Sonar
         son = self.son_e1(x, training=training)
         son = self.son_e2(son, training=training)
         son = self.son_e3(son, training=training)
+        son = self.son_e4(son, training=training)
         son = self.son_f(son)
+        son = self.son_l(son)
 
         # Satellite
         sat = self.sat_e1(y, training=training)
         sat = self.sat_e2(sat, training=training)
         sat = self.sat_e3(sat, training=training)
+        sat = self.sat_e4(sat, training=training)
         sat = self.sat_f(sat)
+        sat = self.sat_l(sat)
 
+        # Subtract
+        z = self.son_sat_sub([son, sat])
+        return tf.linalg.norm(z, axis=1), son, sat
         # Concatenate
-        z = self.son_sat_cat([son, sat])
+        #z = self.son_sat_cat([son, sat])
 
         # MLP
-        z = self.dense_1(z)
-        return self.dense_2(z)
+        #z = self.dense_1(z)
+        #return self.dense_2(z)
