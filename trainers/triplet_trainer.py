@@ -9,6 +9,7 @@ from base.base_dataset import BaseDataset
 from base.base_logger import BaseLogger
 from base.base_model import BaseModel
 from base.base_trainer import BaseTrainer
+from sklearn.metrics import precision_recall_fscore_support
 from tqdm import tqdm
 from typing import Optional
 from typing import Tuple
@@ -104,8 +105,8 @@ class TripletTrainer(BaseTrainer):
 
         son_errs = []
         sat_errs = []
-        positive_distances = []
-        negative_distances = []
+        positives = []
+        negatives = []
         for data, _ in zip(self.valid_dataset.data, loop):
             son_err, son_anc, son_pos, son_neg = self.sonar_validate_step(data[:3])
             sat_err, sat_anc, sat_pos, sat_neg = self.satellite_validate_step(data[3:])
@@ -113,12 +114,12 @@ class TripletTrainer(BaseTrainer):
             # Append step data to epoch data list.
             son_errs.append(son_err)
             sat_errs.append(sat_err)
-            positive_distances.append(tf.linalg.norm(son_anc - son_pos))
-            negative_distances.append(tf.linalg.norm(son_anc - son_neg))
+            positives.append(tf.linalg.norm(son_anc - son_pos))
+            negatives.append(tf.linalg.norm(son_anc - son_neg))
 
         # Convert lists to proper arrays.
-        positive_predictions = np.hstack(positive_distances)
-        negative_predictions = np.hstack(negative_distances)
+        positive_predictions = np.hstack(positives)
+        negative_predictions = np.hstack(negatives)
 
         # Binarize predictions and calculate accuracy.
         positive_predictions = tf.cast(tf.less_equal(positive_predictions / (self.positive_mean + self.negative_mean), 0.5), dtype=tf.int32)
@@ -139,8 +140,8 @@ class TripletTrainer(BaseTrainer):
         self.logger.summarize(self.model.global_step, summarizer="validation", scope="metrics", summaries_dict={
             "positive_accuracy": positive_accuracy,
             "negative_accuracy": negative_accuracy,
-            "positive_distances": np.mean(positive_distances),
-            "negative_distances": np.mean(negative_distances)
+            "positive_distances": np.mean(positives),
+            "negative_distances": np.mean(negatives)
         })
 
         # Save and update epochs on the auxiliary model.

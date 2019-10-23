@@ -1,4 +1,4 @@
-# image_dataset.py
+# segmentation_dataset.py
 
 from __future__ import absolute_import
 from __future__ import division
@@ -12,7 +12,7 @@ import os
 import tensorflow as tf
 
 
-class ImageDataset(BaseDataset):
+class SegmentationDataset(BaseDataset):
     def __init__(self, batch_size: int, folder: str, x_shape: Tuple[int, int, int], y_shape: Tuple[int, int, int]):
         self.x_shape = x_shape
         self.y_shape = y_shape
@@ -22,8 +22,8 @@ class ImageDataset(BaseDataset):
         self._y_filenames = sorted(glob.glob(os.path.join(os.curdir, folder, "gt", "*.png")))
 
         assert (len(self._x_filenames) == len(self._y_filenames))
-        super(ImageDataset, self).__init__(batch_size=batch_size, length=len(self._x_filenames),
-                                           types=(tf.string, tf.string))
+        super(SegmentationDataset, self).__init__(batch_size=batch_size, length=len(self._x_filenames),
+                                                  types=(tf.string, tf.string))
 
     @tf.function
     def _load_x(self, filename: str) -> tf.Tensor:

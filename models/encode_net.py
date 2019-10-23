@@ -27,10 +27,12 @@ class EncodeNet(BaseModel):
                          with_pool=True, with_reduction=False, name='encode')
         self.e3 = Encode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
                          with_pool=True, with_reduction=False, name='encode')
-        self.e4 = Encode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
+        self.e4 = Encode(filters=filters * 8, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
                          with_pool=True, with_reduction=False, name='encode')
         self.flat = tf.keras.layers.Flatten()
-        self.d = tf.keras.layers.Dense(units=1024, activation=None)
+        self.d1 = tf.keras.layers.Dense(units=128, activation='relu')
+        self.drop = tf.keras.layers.Dropout(rate=0.5)
+        self.d2 = tf.keras.layers.Dense(units=64, activation=None)
         self.lamb = tf.keras.layers.Lambda(lambda x: tf.math.l2_normalize(x, axis=1))
 
     @tf.function
@@ -40,7 +42,9 @@ class EncodeNet(BaseModel):
         y = self.e3(y, training=training)
         y = self.e4(y, training=training)
         y = self.flat(y)
-        y = self.d(y)
+        y = self.d1(y)
+        y = self.drop(y)
+        y = self.d2(y)
         y = self.lamb(y)
 
         return y
