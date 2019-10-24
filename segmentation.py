@@ -21,8 +21,8 @@ import tensorflow as tf
 
 # Network entries
 flags.DEFINE_float("learning_rate", 2e-4, "Initial learning rate for the chosen optimizer")
-flags.DEFINE_integer("batch_size", 8, "The size of the batch to use while training the network.", lower_bound=1)
-flags.DEFINE_integer("filters", 16, "A parameter that scales the depth of the neural network.", lower_bound=1)
+flags.DEFINE_integer("batch_size", 16, "The size of the batch to use while training the network.", lower_bound=1)
+flags.DEFINE_integer("filters", 8, "A parameter that scales the depth of the neural network.", lower_bound=1)
 flags.DEFINE_integer("num_epochs", 100, "Number of epochs to train the network for.", lower_bound=1)
 
 # Data entries

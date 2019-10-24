@@ -62,63 +62,58 @@ class SegmentationTrainer(BaseTrainer):
         errs = []
         predictions = []
         targets = []
+        metrics = {"psnr": [], "ssim": []}
         for data, _ in zip(self.valid_dataset.data, loop):
-            err, prediction, target = self.validate_step(data)
+            err, prediction, target, psnr, ssim = self.validate_step(data)
+
+            # Convert prediction and target to desired format.
+            prediction = tf.argmax(prediction, axis=-1)
+            target = tf.argmax(target, axis=-1)
 
             # Append step data to epoch data list.
             errs.append(err)
             predictions.append(prediction)
             targets.append(target)
+            metrics["psnr"].append(psnr)
+            metrics["ssim"].append(ssim)
 
         # Output validation loss and images to TensorBoard.
         batch = rand.choice(range(len(predictions)))
         self.logger.summarize(self.model.global_step, summarizer="validation", summaries_dict={
-            "prediction": np.where(np.equal(np.max(predictions[batch], axis=3, keepdims=True),
-                                            predictions[batch]), 1.0, 0.0),
-            "target": np.where(np.equal(np.max(targets[batch], axis=3, keepdims=True),
-                                        targets[batch]), 1.0, 0.0),
+            "prediction": tf.keras.utils.to_categorical(predictions[batch], num_classes=3),
+            "target": tf.keras.utils.to_categorical(targets[batch], num_classes=3),
         })
 
         # Convert lists to proper arrays.
         predictions = np.concatenate(predictions, axis=0)
         targets = np.concatenate(targets, axis=0)
 
-        # Choose highest class for predictions.
-        predictions = np.argmax(predictions, axis=-1)
-        targets = np.argmax(targets, axis=-1)
-
         # Calculate metrics
         accuracy = tf.reduce_mean(tf.cast(tf.equal(targets, predictions), dtype=tf.float32))
-        iou = np.sum(np.logical_and(targets.ravel(), predictions.ravel())) / np.sum(np.logical_or(targets.ravel(), predictions.ravel()))
+        iou_num = np.sum(np.logical_and(np.ravel(tf.keras.utils.to_categorical(targets, num_classes=3)),
+                         np.ravel(tf.keras.utils.to_categorical(predictions, num_classes=3))))
+        iou_den = np.sum(np.logical_or(np.ravel(tf.keras.utils.to_categorical(targets, num_classes=3)),
+                         np.ravel(tf.keras.utils.to_categorical(predictions, num_classes=3))))
         precision, recall, fscore, _ = precision_recall_fscore_support(targets.ravel(), predictions.ravel())
 
         # Categorize validation metrics under TensorBoard.
         self.logger.summarize(self.model.global_step, summarizer="validation", scope="metrics", summaries_dict={
             "accuracy": accuracy,
-            "intersection": iou
+            "iou": iou_num / iou_den,
+            "psnr": np.mean(metrics["psnr"]),
+            "ssim": np.mean(metrics["ssim"])
         })
 
         self.logger.summarize(self.model.global_step, summarizer="validation", scope="model", summaries_dict={
             "total_loss": np.mean(errs)
         })
 
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="movable", summaries_dict={
-            "precision": precision[0],
-            "recall": recall[0],
-            "f-score": fscore[0]
-        })
-
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="stationary", summaries_dict={
-            "precision": precision[1],
-            "recall": recall[1],
-            "f-score": fscore[1]
-        })
-
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="water", summaries_dict={
-            "precision": precision[2],
-            "recall": recall[2],
-            "f-score": fscore[2]
-        })
+        for i, scope in zip(range(3), ["movable", "stationary", "water"]):
+            self.logger.summarize(self.model.global_step, summarizer="validation", scope=scope, summaries_dict={
+                "precision": precision[i],
+                "recall": recall[i],
+                "f-score": fscore[i]
+            })
 
     @tf.function
     def validate_step(self, data: Tuple[tf.Tensor, ...]) -> Tuple[tf.Tensor, ...]:
@@ -128,4 +123,8 @@ class SegmentationTrainer(BaseTrainer):
         prediction = self.model(x, training=False)
         loss = self.model.loss(y, prediction)
 
-        return loss, prediction, y
+        # Calculate metrics on validation data.
+        psnr = tf.image.psnr(y, prediction, max_val=1.0)
+        ssim = tf.image.ssim(y, prediction, max_val=1.0)
+
+        return loss, prediction, y, psnr, ssim
