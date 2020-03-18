@@ -26,11 +26,11 @@ class MatchingDataset(BaseDataset):
         else:
             self._x_filenames = sorted(glob.glob(os.path.join(os.curdir, folder, "..", "images", "input", "*.png")))
             self._y_filenames = sorted(glob.glob(os.path.join(os.curdir, folder, "..", "images", "gt", "*.png")))
-        self._data = pd.read_csv(os.path.join(os.curdir, folder, "new_data.csv")).iloc[:, :].values
+        self._data = pd.read_csv(os.path.join(os.curdir, folder, "data.csv")).iloc[:, :].values
 
         assert(len(self._x_filenames) == len(self._y_filenames))
         super(MatchingDataset, self).__init__(batch_size=batch_size, length=len(self._data[:, 0]),
-                                              types=(tf.string, tf.string, tf.int32))
+                                              types=(tf.string, tf.string, tf.float32))
 
     @tf.function
     def _load_x(self, filename: str) -> tf.Tensor:

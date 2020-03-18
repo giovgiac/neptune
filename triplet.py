@@ -25,9 +25,9 @@ flags.DEFINE_integer("filters", 2, "A parameter that scales the depth of the neu
 flags.DEFINE_integer("num_epochs", 100, "Number of epochs to train the network for.", lower_bound=1)
 
 # Data entries
-flags.DEFINE_list("input_shape", [128, 256, 1], "The shape of the data to input in the neural network.")
+flags.DEFINE_list("input_shape", [128, 256, 3], "The shape of the data to input in the neural network.")
 flags.DEFINE_list("satellite_shape", [128, 256, 1], "The shape of the satellite image to input in the network.")
-flags.DEFINE_list("output_shape", [128, 256, 1], "The shape of the data that will be output from the neural network.")
+flags.DEFINE_list("output_shape", [128, 256, 3], "The shape of the data that will be output from the neural network.")
 
 
 def main(argv) -> None:
@@ -42,13 +42,13 @@ def main(argv) -> None:
                                        folder="datasets/triplet_aracati/train",
                                        x_shape=config.input_shape,
                                        y_shape=config.output_shape,
-                                       is_evaluating=False)
+                                       is_validation=False)
 
         valid_dataset = TripletDataset(batch_size=config.batch_size,
                                        folder="datasets/triplet_aracati/validation",
                                        x_shape=config.input_shape,
                                        y_shape=config.output_shape,
-                                       is_evaluating=False)
+                                       is_validation=True)
 
         # Define the sonar model.
         son_loss = TripletLoss()

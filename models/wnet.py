@@ -22,18 +22,18 @@ class WNet(BaseModel):
 
         # Define sublayers of the W-Net.
         self.son_encode_1 = Encode(filters=filters, kernel_size=3, activation_fn=tf.keras.layers.ELU,
-                                   with_pool=False, with_reduction=False, name='sonar_encode')
+                                   with_dropout=False, with_pool=False, with_reduction=False, name='sonar_encode')
         self.son_encode_2 = Encode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ELU,
-                                   with_pool=False, with_reduction=True, name='sonar_encode')
+                                   with_dropout=False, with_pool=False, with_reduction=True, name='sonar_encode')
         self.son_encode_3 = Encode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ELU,
-                                   with_pool=False, with_reduction=True, name='sonar_encode')
+                                   with_dropout=False, with_pool=False, with_reduction=True, name='sonar_encode')
 
         self.sat_encode_1 = Encode(filters=filters, kernel_size=3, activation_fn=tf.keras.layers.ELU,
-                                   with_pool=False, with_reduction=True, name='satellite_encode')
+                                   with_dropout=False, with_pool=False, with_reduction=True, name='satellite_encode')
         self.sat_encode_2 = Encode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ELU,
-                                   with_pool=False, with_reduction=True, name='satellite_encode')
+                                   with_dropout=False, with_pool=False, with_reduction=True, name='satellite_encode')
         self.sat_encode_3 = Encode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ELU,
-                                   with_pool=False, with_reduction=True, name='satellite_encode')
+                                   with_dropout=False, with_pool=False, with_reduction=True, name='satellite_encode')
 
         self.son_sat_cat = tf.keras.layers.Concatenate()
 

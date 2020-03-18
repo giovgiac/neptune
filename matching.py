@@ -11,12 +11,13 @@ from absl import logging
 from datasets.matching_dataset import MatchingDataset
 from evaluators.matching_evaluator import MatchingEvaluator
 from loggers.logger import Logger
-from losses.contrastive import ContrastiveLoss
 from models.dizygotic_net import DizygoticNet
 from optimizers.lookahead import Lookahead
 from optimizers.radam import RectifiedAdam
 from trainers.matching_trainer import MatchingTrainer
 from utils.config import process_config
+
+import tensorflow as tf
 
 
 # Network entries
@@ -52,7 +53,7 @@ def main(argv) -> None:
                                         is_evaluating=False)
 
         # Define the model.
-        loss = ContrastiveLoss(margin=0.1)
+        loss = tf.keras.losses.BinaryCrossentropy()
         ranger = Lookahead(RectifiedAdam(learning_rate=config.learning_rate), sync_period=6, slow_step_size=0.5)
         model = DizygoticNet(filters=config.filters, loss=loss, optimizer=ranger)
         if config.mode == "restore":

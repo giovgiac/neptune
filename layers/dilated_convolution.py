@@ -46,7 +46,8 @@ class DilatedConv2D(tf.keras.layers.Layer):
         if self.activation_fn:
             self.actv_4 = activation_fn()
 
-        self.conv_f = tf.keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, padding=padding)
+        self.conv_f = tf.keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, padding=padding,
+                                             activity_regularizer=tf.keras.regularizers.l1(0.001))
         self.concat = tf.keras.layers.Concatenate()
 
     @tf.function

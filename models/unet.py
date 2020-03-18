@@ -22,14 +22,14 @@ class UNet(BaseModel):
 
         # Define sublayers of the U-Net.
         self.encode_1 = Encode(filters=filters, kernel_size=3, activation_fn=tf.keras.layers.ELU,
-                               with_pool=False, with_reduction=False, name='encode')
+                               with_dropout=False, with_pool=False, with_reduction=False, name='encode')
         self.encode_2 = Encode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ELU,
-                               with_pool=True, with_reduction=False, name='encode')
+                               with_dropout=False, with_pool=True, with_reduction=False, name='encode')
         self.encode_3 = Encode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ELU,
-                               with_pool=True, with_reduction=False, name='encode')
+                               with_dropout=False, with_pool=True, with_reduction=False, name='encode')
 
         self.decode_1 = Decode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ELU,
-                               with_dropout=False, with_zoom=True, name='decode')
+                               with_dropout=True, with_zoom=True, name='decode')
         self.decode_2 = Decode(filters=filters * 1, kernel_size=3, activation_fn=tf.keras.layers.ELU,
                                with_dropout=False, with_zoom=True, name='decode')
 

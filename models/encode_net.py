@@ -22,13 +22,13 @@ class EncodeNet(BaseModel):
 
         # Network layers.
         self.e1 = Encode(filters=filters * 1, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                         with_pool=True, with_reduction=False, name='encode')
+                         with_dropout=False, with_pool=True, with_reduction=False, name='encode')
         self.e2 = Encode(filters=filters * 2, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                         with_pool=True, with_reduction=False, name='encode')
+                         with_dropout=True, with_pool=True, with_reduction=False, name='encode')
         self.e3 = Encode(filters=filters * 4, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                         with_pool=True, with_reduction=False, name='encode')
+                         with_dropout=True, with_pool=True, with_reduction=False, name='encode')
         self.e4 = Encode(filters=filters * 8, kernel_size=3, activation_fn=tf.keras.layers.ReLU,
-                         with_pool=True, with_reduction=False, name='encode')
+                         with_dropout=False, with_pool=True, with_reduction=False, name='encode')
         self.flat = tf.keras.layers.Flatten()
         self.d1 = tf.keras.layers.Dense(units=128, activation='relu')
         self.drop = tf.keras.layers.Dropout(rate=0.5)

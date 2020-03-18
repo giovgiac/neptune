@@ -14,8 +14,8 @@ import time
 
 
 # Core entries
-flags.DEFINE_enum("mode", "restore", ["evaluate", "restore", "train"], "The modes that are available.")
-flags.DEFINE_string("name", "2019-10-24/chewy-lilac-lemming", "Name of the folder to store the files of the running experiment.")
+flags.DEFINE_enum("mode", "train", ["evaluate", "restore", "train"], "The modes that are available.")
+flags.DEFINE_string("name", "auto", "Name of the folder to store the files of the running experiment.")
 
 # Non-configurable entries
 flags.DEFINE_string("checkpoint_dir", "", "Location to save the training checkpoints. (Do not edit).")
@@ -61,5 +61,5 @@ def process_config() -> flags.FlagValues:
                                             config.presentation_dir, config.summary_dir))
 
     # Log out the command for using TensorBoard.
-    logging.info('tensorboard --logdir="{}" --bind_all --port 6006'.format(os.path.abspath(config.summary_dir)))
+    logging.info('tensorboard --logdir="{}" --host 0.0.0.0 --port 6006'.format(os.path.abspath(config.summary_dir)))
     return config
