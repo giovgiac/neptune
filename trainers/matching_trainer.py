@@ -20,12 +20,14 @@ import tensorflow as tf
 class MatchingTrainer(BaseTrainer):
     def __init__(self, model: BaseModel, logger: BaseLogger, train_dataset: BaseDataset,
                  valid_dataset: Optional[BaseDataset]) -> None:
-        super(MatchingTrainer, self).__init__(model, logger, train_dataset, valid_dataset)
+        super(MatchingTrainer, self).__init__({"model": model}, logger, train_dataset, valid_dataset)
+
+        # Neural network model references.
+        self.model = model
 
     def train_epoch(self) -> None:
         loop = tqdm(range(len(self.train_dataset)))
-        loop.set_description("Training Epoch [{}/{}]".format(int(self.model.epoch),
-                                                             self.config.num_epochs))
+        loop.set_description("Training Epoch [{}/{}]".format(int(self.epoch), self.config.num_epochs))
 
         errs = []
         predictions = []
@@ -40,7 +42,7 @@ class MatchingTrainer(BaseTrainer):
             targets.append(target)
 
             # Increment global step counter.
-            self.model.global_step.assign_add(delta=1)
+            self.global_step.assign_add(delta=1)
 
         # Convert lists to proper arrays.
         predictions = np.concatenate(predictions, axis=0)
@@ -53,7 +55,7 @@ class MatchingTrainer(BaseTrainer):
         # Calculate metrics on validation data.
         accuracy = tf.reduce_mean(tf.cast(tf.equal(targets, predictions), dtype=tf.float32))
 
-        self.logger.summarize(self.model.global_step, summarizer="train", scope="model", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="train", scope="model", summaries_dict={
             "accuracy": accuracy,
             "total_loss": np.mean(errs)
         })
@@ -73,7 +75,7 @@ class MatchingTrainer(BaseTrainer):
 
     def validate_epoch(self) -> None:
         loop = tqdm(range(len(self.valid_dataset)))
-        loop.set_description("Validating Epoch {}".format(int(self.model.epoch)))
+        loop.set_description("Validating Epoch {}".format(int(self.epoch)))
 
         errs = []
         predictions = []
@@ -99,19 +101,19 @@ class MatchingTrainer(BaseTrainer):
         precision, recall, fscore, _ = precision_recall_fscore_support(targets, predictions)
 
         # Output validation loss to TensorBoard.
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="model", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", scope="model", summaries_dict={
             "accuracy": accuracy,
             "total_loss": np.mean(errs)
         })
 
         # Categorize validation metrics under TensorBoard.
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="match", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", scope="match", summaries_dict={
             "precision": precision[1],
             "recall": recall[1],
             "f-score": fscore[1]
         })
 
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="mismatch", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", scope="mismatch", summaries_dict={
             "precision": precision[0],
             "recall": recall[0],
             "f-score": fscore[0]

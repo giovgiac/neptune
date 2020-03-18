@@ -20,12 +20,14 @@ import tensorflow as tf
 class GeneralTrainer(BaseTrainer):
     def __init__(self, model: BaseModel, logger: BaseLogger, train_dataset: BaseDataset,
                  valid_dataset: Optional[BaseDataset]) -> None:
-        super(GeneralTrainer, self).__init__(model, logger, train_dataset, valid_dataset)
+        super(GeneralTrainer, self).__init__({"model": model}, logger, train_dataset, valid_dataset)
+
+        # Neural network model references.
+        self.model = model
 
     def train_epoch(self) -> None:
         loop = tqdm(range(len(self.train_dataset)))
-        loop.set_description("Training Epoch [{}/{}]".format(int(self.model.epoch),
-                                                             self.config.num_epochs))
+        loop.set_description("Training Epoch [{}/{}]".format(int(self.epoch), self.config.num_epochs))
 
         errs = []
         for data, _ in zip(self.train_dataset.data, loop):
@@ -36,9 +38,9 @@ class GeneralTrainer(BaseTrainer):
             errs.append(err)
 
             # Increment global step counter.
-            self.model.global_step.assign_add(delta=1)
+            self.global_step.assign_add(delta=1)
 
-        self.logger.summarize(self.model.global_step, summarizer="train", scope="model", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="train", scope="model", summaries_dict={
             "total_loss": np.mean(errs)
         })
 
@@ -56,7 +58,7 @@ class GeneralTrainer(BaseTrainer):
 
     def validate_epoch(self) -> None:
         loop = tqdm(range(len(self.valid_dataset)))
-        loop.set_description("Validating Epoch {}".format(int(self.model.epoch)))
+        loop.set_description("Validating Epoch {}".format(int(self.epoch)))
 
         errs = []
         predictions = []
@@ -74,17 +76,17 @@ class GeneralTrainer(BaseTrainer):
 
         # Output validation loss and images to TensorBoard.
         batch = rand.choice(range(len(predictions)))
-        self.logger.summarize(self.model.global_step, summarizer="validation", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", summaries_dict={
             "prediction": predictions[batch],
             "target": targets[batch],
         })
 
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="model", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", scope="model", summaries_dict={
             "total_loss": np.mean(errs)
         })
 
         # Categorize validation metrics under TensorBoard.
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="metrics", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", scope="metrics", summaries_dict={
             "psnr": np.mean(metrics["psnr"]),
             "ssim": np.mean(metrics["ssim"])
         })

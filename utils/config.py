@@ -16,6 +16,7 @@ import time
 # Core entries
 flags.DEFINE_enum("mode", "train", ["evaluate", "restore", "train"], "The modes that are available.")
 flags.DEFINE_string("name", "auto", "Name of the folder to store the files of the running experiment.")
+flags.DEFINE_integer("max_to_keep", "5", "Maximum number of checkpoints to store.")
 
 # Non-configurable entries
 flags.DEFINE_string("checkpoint_dir", "", "Location to save the training checkpoints. (Do not edit).")

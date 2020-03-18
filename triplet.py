@@ -54,15 +54,11 @@ def main(argv) -> None:
         son_loss = TripletLoss()
         son_ranger = Lookahead(RectifiedAdam(learning_rate=config.learning_rate), sync_period=6, slow_step_size=0.5)
         son_model = EncodeNet(filters=config.filters, loss=son_loss, optimizer=son_ranger)
-        if config.mode == "restore":
-            son_model.load_checkpoint()
 
         # Define the satellite model.
         sat_loss = TripletLoss()
         sat_ranger = Lookahead(RectifiedAdam(learning_rate=config.learning_rate), sync_period=6, slow_step_size=0.5)
         sat_model = EncodeNet(filters=config.filters, loss=sat_loss, optimizer=sat_ranger)
-        if config.mode == "restore":
-            sat_model.load_checkpoint()
 
         # Define the logger.
         logger = Logger()
@@ -70,6 +66,8 @@ def main(argv) -> None:
         # Define the trainer.
         trainer = TripletTrainer(son_model=son_model, sat_model=sat_model, logger=logger, train_dataset=train_dataset,
                                  valid_dataset=valid_dataset)
+        if config.mode == "restore":
+            trainer.load_checkpoint()
         trainer.train()
     else:
         logging.fatal("Evaluation not implemented yet.")

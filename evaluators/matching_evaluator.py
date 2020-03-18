@@ -16,10 +16,13 @@ import tensorflow as tf
 
 class MatchingEvaluator(BaseEvaluator):
     def __init__(self, model: BaseModel, dataset: BaseDataset):
-        super(MatchingEvaluator, self).__init__(model, dataset)
+        super(MatchingEvaluator, self).__init__({"model": model}, dataset)
 
         # Evaluator state variables.
         self.example = 0
+
+        # Neural network model references.
+        self.model = model
 
     def evaluate(self) -> None:
         loop = tqdm(range(len(self.dataset)))

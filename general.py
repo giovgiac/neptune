@@ -56,14 +56,14 @@ def main(argv) -> None:
         loss = tf.keras.losses.MeanAbsoluteError()
         ranger = Lookahead(RectifiedAdam(learning_rate=config.learning_rate), sync_period=6, slow_step_size=0.5)
         model = WNet(filters=config.filters, loss=loss, optimizer=ranger)
-        if config.mode == "restore":
-            model.load_checkpoint()
 
         # Define the logger.
         logger = Logger()
 
         # Define the trainer.
         trainer = GeneralTrainer(model=model, logger=logger, train_dataset=train_dataset, valid_dataset=valid_dataset)
+        if config.mode == "restore":
+            trainer.load_checkpoint()
         trainer.train()
     else:
         # Define the test dataset.
@@ -75,10 +75,10 @@ def main(argv) -> None:
 
         # Define the model.
         model = WNet(filters=config.filters, loss=None, optimizer=None)
-        model.load_checkpoint()
 
         # Define the evaluator.
         evaluator = GeneralEvaluator(model=model, dataset=test_dataset)
+        evaluator.load_checkpoint()
         evaluator.evaluate()
 
 

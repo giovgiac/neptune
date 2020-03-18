@@ -21,12 +21,14 @@ import tensorflow as tf
 class SegmentationTrainer(BaseTrainer):
     def __init__(self, model: BaseModel, logger: BaseLogger, train_dataset: BaseDataset,
                  valid_dataset: Optional[BaseDataset]) -> None:
-        super(SegmentationTrainer, self).__init__(model, logger, train_dataset, valid_dataset)
+        super(SegmentationTrainer, self).__init__({"model": model}, logger, train_dataset, valid_dataset)
+
+        # Neural network model references.
+        self.model = model
 
     def train_epoch(self) -> None:
         loop = tqdm(range(len(self.train_dataset)))
-        loop.set_description("Training Epoch [{}/{}]".format(int(self.model.epoch),
-                                                             self.config.num_epochs))
+        loop.set_description("Training Epoch [{}/{}]".format(int(self.epoch), self.config.num_epochs))
 
         errs = []
         for data, _ in zip(self.train_dataset.data, loop):
@@ -37,9 +39,9 @@ class SegmentationTrainer(BaseTrainer):
             errs.append(err)
 
             # Increment global step counter.
-            self.model.global_step.assign_add(delta=1)
+            self.global_step.assign_add(delta=1)
 
-        self.logger.summarize(self.model.global_step, summarizer="train", scope="model", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="train", scope="model", summaries_dict={
             "total_loss": np.mean(errs)
         })
 
@@ -57,7 +59,7 @@ class SegmentationTrainer(BaseTrainer):
 
     def validate_epoch(self) -> None:
         loop = tqdm(range(len(self.valid_dataset)))
-        loop.set_description("Validating Epoch {}".format(int(self.model.epoch)))
+        loop.set_description("Validating Epoch {}".format(int(self.epoch)))
 
         errs = []
         predictions = []
@@ -79,7 +81,7 @@ class SegmentationTrainer(BaseTrainer):
 
         # Output validation loss and images to TensorBoard.
         batch = rand.choice(range(len(predictions)))
-        self.logger.summarize(self.model.global_step, summarizer="validation", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", summaries_dict={
             "prediction": tf.keras.utils.to_categorical(predictions[batch], num_classes=3),
             "target": tf.keras.utils.to_categorical(targets[batch], num_classes=3),
         })
@@ -97,19 +99,19 @@ class SegmentationTrainer(BaseTrainer):
         precision, recall, fscore, _ = precision_recall_fscore_support(targets.ravel(), predictions.ravel())
 
         # Categorize validation metrics under TensorBoard.
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="metrics", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", scope="metrics", summaries_dict={
             "accuracy": accuracy,
             "iou": iou_num / iou_den,
             "psnr": np.mean(metrics["psnr"]),
             "ssim": np.mean(metrics["ssim"])
         })
 
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="model", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", scope="model", summaries_dict={
             "total_loss": np.mean(errs)
         })
 
         for i, scope in zip(range(3), ["movable", "stationary", "water"]):
-            self.logger.summarize(self.model.global_step, summarizer="validation", scope=scope, summaries_dict={
+            self.logger.summarize(self.global_step, summarizer="validation", scope=scope, summaries_dict={
                 "precision": precision[i],
                 "recall": recall[i],
                 "f-score": fscore[i]

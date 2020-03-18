@@ -4,12 +4,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from absl import logging
 from base.base_dataset import BaseDataset
 from base.base_logger import BaseLogger
 from base.base_model import BaseModel
 from base.base_trainer import BaseTrainer
-from sklearn.metrics import precision_recall_fscore_support
 from tqdm import tqdm
 from typing import Optional
 from typing import Tuple
@@ -21,7 +19,8 @@ import tensorflow as tf
 class TripletTrainer(BaseTrainer):
     def __init__(self, son_model: BaseModel, sat_model: BaseModel, logger: BaseLogger, train_dataset: BaseDataset,
                  valid_dataset: Optional[BaseDataset]) -> None:
-        super(TripletTrainer, self).__init__(son_model, logger, train_dataset, valid_dataset)
+        super(TripletTrainer, self).__init__({"son_model": son_model, "sat_model": sat_model}, logger, train_dataset,
+                                             valid_dataset)
 
         # Neural network model references.
         self.son_model = son_model
@@ -31,13 +30,9 @@ class TripletTrainer(BaseTrainer):
         self.positives = {"mean": None, "std": None}
         self.negatives = {"mean": None, "std": None}
 
-        self.sat_model.build(input_shape=(None,) + self.config.input_shape)
-        self.sat_model.summary(print_fn=logging.info)
-
     def train_epoch(self) -> None:
         loop = tqdm(range(len(self.train_dataset)))
-        loop.set_description("Training Epoch [{}/{}]".format(int(self.model.epoch),
-                                                             self.config.num_epochs))
+        loop.set_description("Training Epoch [{}/{}]".format(int(self.epoch), self.config.num_epochs))
 
         son_errs = []
         sat_errs = []
@@ -59,7 +54,7 @@ class TripletTrainer(BaseTrainer):
             negative_distances.append(son_neg)
 
             # Increment global step counter.
-            self.model.global_step.assign_add(delta=1)
+            self.global_step.assign_add(delta=1)
 
         # Turn lists into proper numpy arrays.
         positive_distances = np.hstack(positive_distances)
@@ -71,12 +66,12 @@ class TripletTrainer(BaseTrainer):
         self.negatives["mean"] = np.mean(negative_distances)
         self.negatives["std"] = np.std(negative_distances)
 
-        self.logger.summarize(self.model.global_step, summarizer="train", scope="model", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="train", scope="model", summaries_dict={
             "sonar_loss": np.mean(son_errs),
             "satellite_loss": np.mean(sat_errs)
         })
 
-        self.logger.summarize(self.model.global_step, summarizer="train", scope="distribution", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="train", scope="distribution", summaries_dict={
             "positive_mean": self.positives["mean"],
             "positive_std": self.positives["std"],
             "negative_mean": self.negatives["mean"],
@@ -134,7 +129,7 @@ class TripletTrainer(BaseTrainer):
 
     def validate_epoch(self) -> None:
         loop = tqdm(range(len(self.valid_dataset)))
-        loop.set_description("Validating Epoch {}".format(int(self.model.epoch)))
+        loop.set_description("Validating Epoch {}".format(int(self.epoch)))
 
         son_errs = []
         sat_errs = []
@@ -169,27 +164,23 @@ class TripletTrainer(BaseTrainer):
         negative_accuracy = tf.reduce_mean(tf.cast(tf.equal(negative_targets, negative_predictions), dtype=tf.float32))
 
         # Output validation loss to TensorBoard.
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="model", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", scope="model", summaries_dict={
             "sonar_loss": np.mean(son_errs),
             "satellite_loss": np.mean(sat_errs)
         })
 
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="metrics", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", scope="metrics", summaries_dict={
             "accuracy": np.mean([negative_accuracy, positive_accuracy]),
             "positive_accuracy": positive_accuracy,
             "negative_accuracy": negative_accuracy
         })
 
-        self.logger.summarize(self.model.global_step, summarizer="validation", scope="distribution", summaries_dict={
+        self.logger.summarize(self.global_step, summarizer="validation", scope="distribution", summaries_dict={
             "positive_mean": np.mean(positive_distances),
             "positive_std": np.std(positive_distances),
             "negative_mean": np.mean(negative_distances),
             "negative_std": np.std(negative_distances)
         })
-
-        # Save and update epochs on the auxiliary model.
-        self.sat_model.save_checkpoint()
-        self.sat_model.epoch.assign_add(delta=1)
 
         """"
         CODE FOR: MULTIVARIATE GAUSSIAN MATCHING PROBABILITY

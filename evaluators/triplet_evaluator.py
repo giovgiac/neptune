@@ -16,7 +16,7 @@ import tensorflow as tf
 
 class TripletEvaluator(BaseEvaluator):
     def __init__(self, son_model: BaseModel, sat_model: BaseModel, dataset: BaseDataset, positives: Dict, negatives: Dict):
-        super(TripletEvaluator, self).__init__(son_model, dataset)
+        super(TripletEvaluator, self).__init__({"son_model": son_model, "sat_model": sat_model}, dataset)
 
         # Neural network model references.
         self.son_model = son_model

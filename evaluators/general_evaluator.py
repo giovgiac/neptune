@@ -16,7 +16,10 @@ import tensorflow as tf
 
 class GeneralEvaluator(BaseEvaluator):
     def __init__(self, model: BaseModel, dataset: BaseDataset):
-        super(GeneralEvaluator, self).__init__(model, dataset)
+        super(GeneralEvaluator, self).__init__({"model": model}, dataset)
+
+        # Neural network model references.
+        self.model = model
 
     def evaluate(self) -> None:
         loop = tqdm(range(len(self.dataset)))
