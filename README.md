@@ -44,7 +44,7 @@ $ python general.py --batch_size=16 --learning_rate=1e-4
 ## Publications
 
 Below is a list of papers we published that are related to this codebase:
-* [Satellite and Underwater Sonar Image Matching using Deep Learning]()
+* [Satellite and Underwater Sonar Image Matching using Deep Learning](https://ieeexplore.ieee.org/abstract/document/9018563)
 * [Semantic Segmentation of Static and Dynamic Structures of Marina Satellite Images using Deep Learning](https://ieeexplore.ieee.org/abstract/document/8923817)
 * [Sonar-to-Satellite Translation using Deep Learning](https://ieeexplore.ieee.org/abstract/document/8614099)
 * [Underwater Sonar and Aerial Images Data Fusion for Robot Localization](https://ieeexplore.ieee.org/abstract/document/8981586)
