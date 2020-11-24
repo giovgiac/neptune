@@ -48,3 +48,10 @@ Below is a list of papers we published that are related to this codebase:
 * [Semantic Segmentation of Static and Dynamic Structures of Marina Satellite Images using Deep Learning](https://ieeexplore.ieee.org/abstract/document/8923817)
 * [Sonar-to-Satellite Translation using Deep Learning](https://ieeexplore.ieee.org/abstract/document/8614099)
 * [Underwater Sonar and Aerial Images Data Fusion for Robot Localization](https://ieeexplore.ieee.org/abstract/document/8981586)
+
+## Datasets
+
+[Download ARACATI 2017 Matching Dataset](https://drive.google.com/file/d/101fvgVCmP06dGVxxnqAP-TjCcLVPa3lV/view?usp=sharing)
+[Download ARACATI 2017 Segmentation Dataset](https://drive.google.com/file/d/1NeixIVEuh4f7LyxevH2M2kSEzBcFHFBR/view?usp=sharing)
+[Download ARACATI 2017 Translation Dataset](https://drive.google.com/file/d/1R-tcU67vl_jnnhqvbuE3gMJ9LfOREUpm/view?usp=sharing)
+
