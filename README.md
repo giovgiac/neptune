@@ -52,6 +52,8 @@ Below is a list of papers we published that are related to this codebase:
 ## Datasets
 
 [Download ARACATI 2017 Matching Dataset](https://drive.google.com/file/d/101fvgVCmP06dGVxxnqAP-TjCcLVPa3lV/view?usp=sharing)
+
 [Download ARACATI 2017 Segmentation Dataset](https://drive.google.com/file/d/1NeixIVEuh4f7LyxevH2M2kSEzBcFHFBR/view?usp=sharing)
+
 [Download ARACATI 2017 Translation Dataset](https://drive.google.com/file/d/1R-tcU67vl_jnnhqvbuE3gMJ9LfOREUpm/view?usp=sharing)
 
